@@ -1,0 +1,22 @@
+#!/bin/bash
+
+apt-get update && apt-get upgrade -y && apt-get install vim jq curl git lynx python3 -y
+
+#php
+
+#Python3.10
+#apt-get install software-properties-common -y
+#add-apt-repository ppa:deadsnakes/ppa -y
+#apt update
+#apt install python3.10 -y
+#mv /usr/bin/python3.10 /usr/bin/python3
+
+# Go
+
+# Set paths = $HOME/scripts + $HOME/robscripts
+
+# Set vim preferences
+# rwxrob/dotfiles/vim -> execute setup file | check what files need
+
+# Set prompt
+# 

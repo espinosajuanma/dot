@@ -1,0 +1,11 @@
+#!/bin/bash
+query=$(sed 's/ /%20/g' <<< "$@")
+json=$(curl -s "https://yts-subs.com/search/ajax?mov=$query")
+for row in $(echo "${json}" | jq -r '.[] | @base64'); do
+  _jq(){
+    echo ${row} | base64 --decode | jq -r ${1}
+  }
+  t=$(_jq '.mv_mainTitle')
+  i=$(_jq '.mv_imdbCode')
+  printf '🎬 %s\n %s\n' "$t" "https://imdb.com/title/$i"
+done

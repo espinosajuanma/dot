@@ -1,0 +1,8 @@
+#!/bin/bash
+this=`basename "$0"`
+test -z $1 && echo "Usage: $this <script-name>" && exit 1
+test -d "$1" && echo "$1 is a directory! Can't do this." && exit 1
+test -f "$1" && echo "$1 already exist! Can't do this." && exit 1
+
+echo "#!/bin/bash" > "$1" && chmod 755 "$1"
+vim $1
