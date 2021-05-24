@@ -9,7 +9,7 @@
 #       note <isosec> edit
 #       note <isosec> rm
 
-d=$(ls -td -- */ | head -n 1 | cut -d'/' -f1) # get last directory (isosec) in current directory
+d=$(ls -td -- */ | tail -n 1 | cut -d'/' -f1) # get last directory (isosec) in current directory
 
 test -z "$1" && echo $d && exit 1
 test $1 == "edit" && vim "$d/README.md" && exit 1
