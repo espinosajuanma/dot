@@ -1,0 +1,3 @@
+#!/bin/bash
+test -z $1 && echo "Give me a reason to commit and push" && exit 1
+git add . && git commit -m "$1" && git push
