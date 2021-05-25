@@ -1,4 +1,0 @@
-#!/bin/bash
-export PATH="$PATH:$PWD"
-
-find $PWD -type f -iname "*" -exec chmod +x {} \;
