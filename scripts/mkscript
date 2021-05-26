@@ -1,0 +1,17 @@
+#!/bin/bash
+#this=$(basename "$0")
+
+read -rp "name: " name
+test -z "$name" && echo "You have to set a script name!" && exit 1
+
+read -rp "path ($PWD): " d
+test -z "$d" && d="$PWD"
+
+test -d "$d/$name" && echo "$d/$name is a directory! Can't do this." && exit 1
+test -f "$d/$name" && echo "$d/$name already exist! Can't do this." && exit 1
+
+read -rp "shebang (#!/bin/sh): " shebang
+test -z "$shebang" && shebang="#!/bin/sh"
+
+echo "$shebang" > "$d/$name" && chmod +x "$d/$name"
+vim "$d/$name"
