@@ -1,16 +1,16 @@
-#!/bin/bash
+#!/bin/sh
 #this=$(basename "$0")
 
-read -rp "name: " name
+echo "name: \c" && read -r name
 test -z "$name" && echo "You have to set a script name!" && exit 1
 
-read -rp "path ($PWD): " d
+echo "path ($PWD): \c" && read -r d
 test -z "$d" && d="$PWD"
 
 test -d "$d/$name" && echo "$d/$name is a directory! Can't do this." && exit 1
 test -f "$d/$name" && echo "$d/$name already exist! Can't do this." && exit 1
 
-read -rp "shebang (#!/bin/sh): " shebang
+echo "shebang (#!/bin/sh): \c" && read -r shebang
 test -z "$shebang" && shebang="#!/bin/sh"
 
 echo "$shebang" > "$d/$name" && chmod +x "$d/$name"
