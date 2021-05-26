@@ -1,2 +1,0 @@
-#!/bin/bash
-find "$PWD" -type f -iname "*" -exec chmod +x {} \;
