@@ -1,5 +1,5 @@
 #!/bin/bash
-# note usage
+#note usage
 #       note = show latest isosec note
 #       note new = add a note in directory
 #       note ls = show titles of notes in directory
@@ -11,13 +11,44 @@
 
 d=$(find . -mindepth 1 -maxdepth 1 -type d | sort -n | tail -n 1 | sed 's/\.\///')
 
-test -z "$1" && echo "$d" && exit 1
-test "$1" == "edit" && vim "$d/README.md" && exit 1
-test "$1" == "remove" -o "$1" == "rm" && rm -rI "$(note)" && exit 1
-test "$1" == "new" -o "$1" == "add" && d="$(isosec)" && mkdir "$d" && vim "$d/README.md" && exit 1
-test "$1" == "list" -o "$1" == "ls" && head -1 ./*/README.md | grep '^#' | sed 's/^\# //' && exit 1
-test "$1" == "help" -o "$1" == "h" && awk 'NR >= 2 && NR <= 10' "$(readlink -f "$0")" | grep '^#' | sed 's/^\#//' && exit 1
+edit() {
+  vim "$1/README.md"
+}
+
+list() {
+  head -1 ./*/README.md | grep '^#' | sed 's/^\# //'
+}
+
+showhelp() {
+  awk 'NR >= 2 && NR <= 10' "$(readlink -f "$0")" | grep '^#' | sed 's/^\#//'
+}
+
+remove() {
+  rm -rI "$1"
+}
+
+last() {
+  l=$(find . -mindepth 1 -maxdepth 1 -type d | sort -n | tail -n 1 | sed 's/\.\///')
+}
+
+new() {
+  d="$(isosec)"
+  mkdir "$d"
+  edit "$d"
+}
+
+test -z "$1" && last && echo "$d" && exit 1
+
+test "$1" == "edit" && edit "$(note)" && exit 1
+test "$1" == "remove" -o "$1" == "rm" && remove "$(note)" && exit 1
+
+test "$1" == "new" -o "$1" == "add" && new && exit 1
+test "$1" == "list" -o "$1" == "ls" && list && exit 1
+test "$1" == "help" -o "$1" == "h" && showhelp && exit 1
+
 if [ -d "$1" ]; then
-  test "$2" == "edit" && vim "$1/README.md" && exit 1
-  test "$2" == "remove" -o "$2" == "rm" && rm -rI "$1" && exit 1
+  test "$2" == "edit" && edit "$1" && exit 1
+  test "$2" == "remove" -o "$2" == "rm" && remove "$1" && exit 1
 fi
+
+echo "Usage: $(basename $0) help"
