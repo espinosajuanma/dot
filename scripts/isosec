@@ -1,0 +1,3 @@
+#!/bin/sh
+# author github.com/rwxrob
+exec date -u +%Y%m%d%H%M%S
