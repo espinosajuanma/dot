@@ -1,10 +1,12 @@
 #!/bin/sh
 #note usage
-#       note = show latest isosec note
-#       note new = add a note in directory
-#       note ls = show titles of notes in directory
-#       note rm = remove last note
+#       note      = show latest isosec note
+#       note last = show latest title note
+#       note new  = add a note in directory
+#       note ls   = show titles of notes in directory
+#       note rm   = remove last note
 #       note edit = edit last note
+#       note push = push last note to git # requires `push` script
 #
 #       note <isosec> edit
 #       note <isosec> rm
@@ -25,9 +27,14 @@ remove() {
   rm -rI "$1"
 }
 
-l=""
 last() {
   l=$(find . -mindepth 1 -maxdepth 1 -type d | sort -n | tail -n 1 | sed 's/\.\///')
+  echo "$l"
+}
+
+lasttitle() {
+  title=$(head -n 1 "$(note)/README.md" | grep '^#' | sed 's/^\# //')
+  echo "$title"
 }
 
 new() {
@@ -40,11 +47,17 @@ show() {
   cat "$1/README.md"
 }
 
-test -z "$1" && last && echo "$l" && exit 0
+gitpush() {
+  push "$@"
+}
 
+test -z "$1" && last && exit 0
+
+test "$1" = "last" && lasttitle && exit 0
 test "$1" = "edit" && edit "$(note)" && exit 0
 test "$1" = "remove" -o "$1" = "rm" && remove "$(note)" && exit 0
 test "$1" = "show" -o "$1" = "view" && show "$(note)" && exit 0
+test "$1" = "push" && gitpush "$(note last)" && exit 0
 
 test "$1" = "new" -o "$1" = "add" && new && exit 0
 test "$1" = "list" -o "$1" = "ls" && list && exit 0
