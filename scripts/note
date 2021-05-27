@@ -7,9 +7,12 @@
 #       note rm   = remove last note
 #       note edit = edit last note
 #       note push = push last note to git # requires `push` script
+#       note show = show last note in terminal
 #
 #       note <isosec> edit
 #       note <isosec> rm
+#       note <isosec> show
+#       note <isosec> title
 
 edit() {
   vim "$1/README.md"
@@ -32,8 +35,8 @@ last() {
   echo "$l"
 }
 
-lasttitle() {
-  title=$(head -n 1 "$(note)/README.md" | grep '^#' | sed 's/^\# //')
+gettitle() {
+  title=$(head -n 1 "$1/README.md" | grep '^#' | sed 's/^\# //')
   echo "$title"
 }
 
@@ -53,7 +56,7 @@ gitpush() {
 
 test -z "$1" && last && exit 0
 
-test "$1" = "last" && lasttitle && exit 0
+test "$1" = "last" && gettitle "$(note)" && exit 0
 test "$1" = "edit" && edit "$(note)" && exit 0
 test "$1" = "remove" -o "$1" = "rm" && remove "$(note)" && exit 0
 test "$1" = "show" -o "$1" = "view" && show "$(note)" && exit 0
@@ -67,6 +70,7 @@ if [ -d "$1" ]; then
   test "$2" = "edit" && edit "$1" && exit 0
   test "$2" = "remove" -o "$2" = "rm" && remove "$1" && exit 0
   test "$2" = "show" -o "$2" = "view" && show "$1" && exit 0
+  test "$2" = "title" && gettitle "$1" && exit 0
 fi
 
 echo "Usage: $(basename "$0") help" && exit 1
