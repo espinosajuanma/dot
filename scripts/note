@@ -21,7 +21,10 @@ edit() {
 }
 
 list() {
-  head -1 ./*/README.md | grep '^#' | sed 's/^\# //'
+  awk '{ print "["FILENAME"] " $0""; nextfile}' */README.md | sed -e 's/\/README.md//' -e 's/# //'
+  # I leave last command I use for this. It only shows titles and not
+  # isosec
+  # head -1 ./*/README.md | grep '^#' | sed 's/^\# //'
 }
 
 showhelp() {
