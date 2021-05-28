@@ -1,13 +1,13 @@
 #!/bin/sh
-#note usage
 #       note      = show latest isosec note
 #       note last = show latest title note
-#       note new  = add a note in directory
-#       note ls   = show titles of notes in directory
-#       note rm   = remove last note
 #       note edit = edit last note
 #       note push = push last note to git # requires `push` script
 #       note show = show last note in terminal
+#       note rm   = remove last note
+#       note ls   = show titles of notes in directory
+#
+#       note new  = add a note in directory
 #
 #       note <isosec> edit
 #       note <isosec> rm
@@ -23,7 +23,9 @@ list() {
 }
 
 showhelp() {
-  awk 'NR >= 2 && NR <= 10' "$(readlink -f "$0")" | grep '^#' | sed 's/^\#//'
+  name=$(basename "$0")
+  echo "Usage $name\n"
+  awk 'NR >= 2 && NR <= 10' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
 }
 
 remove() {
@@ -60,17 +62,17 @@ test "$1" = "last" && gettitle "$(note)" && exit
 test "$1" = "edit" && edit "$(note)" && exit
 test "$1" = "remove" -o "$1" = "rm" && remove "$(note)" && exit
 test "$1" = "show" -o "$1" = "view" && show "$(note)" && exit
-test "$1" = "push" && gitpush "$(note last)" && exit 0
+test "$1" = "push" && gitpush "$(note last)" && exit
 
 test "$1" = "new" -o "$1" = "add" && new && exit
 test "$1" = "list" -o "$1" = "ls" && list && exit
 test "$1" = "help" -o "$1" = "h" && showhelp && exit
 
-if [ -d "$1" ]; then
+if test -d "$1"; then
   test "$2" = "edit" && edit "$1" && exit
   test "$2" = "remove" -o "$2" = "rm" && remove "$1" && exit
   test "$2" = "show" -o "$2" = "view" && show "$1" && exit
   test "$2" = "title" && gettitle "$1" && exit
 fi
 
-echo "Usage: $(basename "$0") help" && exit 1 
+showhelp && exit 1
