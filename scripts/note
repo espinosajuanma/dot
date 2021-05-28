@@ -9,6 +9,8 @@
 #
 #       note new  = add a note in directory
 #
+#       note search <query> = show search url for a note
+#
 #       note <isosec> edit
 #       note <isosec> rm
 #       note <isosec> show
@@ -24,7 +26,7 @@ list() {
 
 showhelp() {
   name=$(basename "$0")
-  echo "Usage $name\n"
+  echo "Usage $name"
   awk 'NR >= 2 && NR <= 10' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
 }
 
@@ -56,6 +58,11 @@ gitpush() {
   push "$@"
 }
 
+search() {
+  query="$(echo "$*" | sed -e "s/$1 //" -e 's/\ /+/g')"
+  echo "$(git remote get-url --all origin | sed -e 's/git@github.com:/https:\/\/github.com\//' -e 's/\.git/\//')search?query=$query"
+}
+
 test -z "$1" && last && exit
 
 test "$1" = "last" && gettitle "$(note)" && exit
@@ -63,6 +70,8 @@ test "$1" = "edit" && edit "$(note)" && exit
 test "$1" = "remove" -o "$1" = "rm" && remove "$(note)" && exit
 test "$1" = "show" -o "$1" = "view" && show "$(note)" && exit
 test "$1" = "push" && gitpush "$(note last)" && exit
+
+test "$1" = "search" && search "$@" && exit
 
 test "$1" = "new" -o "$1" = "add" && new && exit
 test "$1" = "list" -o "$1" = "ls" && list && exit

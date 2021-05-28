@@ -1,6 +1,6 @@
 #!/bin/bash
 test -z "$1" && echo "Please insert a path to search" && exit 1
-lang=$1
-query=${*:2}
+lang="$1"
+query="${*:2}"
 link="https://github.com/espinosajuanma/learning/search?q=path:/$lang+${query// /+}"
 echo "$link"
