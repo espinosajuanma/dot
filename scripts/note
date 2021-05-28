@@ -21,7 +21,7 @@ edit() {
 }
 
 list() {
-  awk '{ print "["FILENAME"] " $0""; nextfile}' */README.md | sed -e 's/\/README.md//' -e 's/# //'
+  awk '{ print "["FILENAME"] " $0""; nextfile}' ./*/README.md | sed -e 's/\.\///' -e 's/\/README.md//' -e 's/# //'
   # I leave last command I use for this. It only shows titles and not
   # isosec
   # head -1 ./*/README.md | grep '^#' | sed 's/^\# //'
@@ -74,7 +74,7 @@ test "$1" = "remove" -o "$1" = "rm" && remove "$(note)" && exit
 test "$1" = "show" -o "$1" = "view" && show "$(note)" && exit
 test "$1" = "push" && gitpush "$(note last)" && exit
 
-test "$1" = "search" && search "$@" && exit
+test "$1" = "search" -o "$1" = "q" && search "$@" && exit
 
 test "$1" = "new" -o "$1" = "add" && new && exit
 test "$1" = "list" -o "$1" = "ls" && list && exit
