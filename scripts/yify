@@ -1,0 +1,12 @@
+#!/bin/bash
+query="$*"
+json=$(curl -s "https://yts.mx/ajax/search?query=${query// /%20}")
+for row in $(echo "${json}" | jq -r '.data[] | @base64'); do
+  _jq(){
+    echo "${row}" | base64 --decode | jq -r "${1}"
+  }
+  t=$(_jq '.title')
+  y=$(_jq '.year')
+  u=$(_jq '.url')
+  printf '🎬 %s (%s)\n %s\n' "$t" "$y" "$u"
+done
