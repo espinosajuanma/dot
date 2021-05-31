@@ -87,7 +87,7 @@ if test -d "$1"; then
   test "$2" = "remove" -o "$2" = "rm" && remove "$1" && exit
   test "$2" = "show" -o "$2" = "view" && show "$1" && exit
   test "$2" = "title" && gettitle "$1" && exit
-  test "$2" = "push" && gitpush "$1" "$(note $1 title)" && exit
+  test "$2" = "push" && gitpush "$1" "$(note "$1" title)" && exit
 fi
 
 showhelp && exit 1
