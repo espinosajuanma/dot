@@ -37,6 +37,11 @@ isosec() {
   exec date -u +%Y%m%d%H%M%S
 }
 
+# TODO: implement valid_isosec | returns 1 when is a valid one
+valid_isosec() {
+  echo "$(expr "$1" : '^[0-9]\+' = "14")"
+}
+
 new() {
   d="$(isosec)"
   title="# Title's note"
