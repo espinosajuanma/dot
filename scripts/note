@@ -1,6 +1,6 @@
 #!/bin/sh
 # NAME
-#     note - Show last note isosec
+#     note - print latest note isosec
 # USAGE
 #     note <isosec> [subcommand]
 # DESCRIPTION
@@ -11,16 +11,16 @@
 #     note
 #
 #     Subcommands:
-#       title     show note's title
-#       edit      edit note
+#       title     print note's title
+#       edit      open note in editor
 #       push      push note to github
-#       show      show note in terminal
-#       remove    remove note
+#       show      print note in terminal
+#       remove    delete note
 #
 #     Special subcommands:
 #       new             add a note in directory and open editor
-#       list            show titles of notes in current directory
-#       search [query]  show search url for a note
+#       list            print all notes titles and isosec in current directory
+#       search [query]  print query search url to github repository
 #
 # AUTHOR
 #     github.com/espinosajuanma
@@ -79,7 +79,6 @@ show() {
 git_push() {
   git add "$1/README.md" && git commit -m "$2" && git push
 }
-
 
 main() {
   test -z "$1" && last_isosec && exit
