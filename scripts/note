@@ -4,7 +4,7 @@
 # USAGE
 #     note <isosec> [subcommand]
 # DESCRIPTION
-#     App to take notes for GitHub inpired by github.com/rwxrob/boost
+#     App to take notes for GitHub inspired by github.com/rwxrob/boost
 #
 #     Manage notes in current directory. If ISOSEC is not specified,
 #     will manage latest note in directory, otherwise will handle that
