@@ -1,4 +1,0 @@
-#!/bin/bash
-query="$1"
-am="$(expr $query : '^[0-9]{14}')"
-echo $am
