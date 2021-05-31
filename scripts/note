@@ -1,52 +1,37 @@
 #!/bin/sh
-#       note        = show latest isosec note
-#       note last   = show latest title note
-#       note edit   = edit last note
-#       note push   = push last note to git # requires `push` script
-#       note show   = show last note in terminal
-#       note remove = remove last note
+# NAME
+#     note - Show last note isosec
+# USAGE
+#     note <isosec> [subcommand]
+# DESCRIPTION
+#     App to take notes for GitHub inpired by github.com/rwxrob/boost
 #
-#       note new    = add a note in directory
-#       note list   = show titles of notes in directory
-#       note search <query> = show search url for a note
+#     Manage notes in current directory. If ISOSEC is not specified,
+#     will manage latest note in directory, otherwise will handle that
+#     note
 #
-#       note <isosec> edit
-#       note <isosec> remove
-#       note <isosec> show
-#       note <isosec> title
-#       note <isosec> push
+#     Subcommands:
+#       title     show note's title
+#       edit      edit note
+#       push      push note to github
+#       show      show note in terminal
+#       remove    remove note
+#
+#     Special subcommands:
+#       new             add a note in directory and open editor
+#       list            show titles of notes in current directory
+#       search [query]  show search url for a note
+#
+# AUTHOR
+#     github.com/espinosajuanma
 
-edit() {
-  # Sometimes I want to write notes in other language
-  test -z "$2" && vim "$1/README.md" && return
-  test "$2" = "s" && vim -c "set nospell" "$1/README.md" && return
-}
-
-list() {
-  awk '{ print "["FILENAME"] " $0""; nextfile}' ./*/README.md | sed -e 's/\.\///' -e 's/\/README.md//' -e 's/# //'
-  # I leave last command I use for this. It only shows titles and not
-  # isosec
-  # head -1 ./*/README.md | grep '^#' | sed 's/^\# //'
-}
-
-showhelp() {
+usage() {
   name=$(basename "$0")
-  echo "Usage $name"
-  awk 'NR >= 2 && NR <= 17' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
+  awk 'NR >= 2 && NR <= 26' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
 }
 
-remove() {
-  rm -rI "$1"
-}
-
-last() {
-  l=$(find . -mindepth 1 -maxdepth 1 -type d | sort -n | tail -n 1 | sed 's/\.\///')
-  echo "$l"
-}
-
-gettitle() {
-  title=$(head -n 1 "$1/README.md" | grep '^#' | sed 's/^\# //')
-  echo "$title"
+isosec() {
+  exec date -u +%Y%m%d%H%M%S
 }
 
 new() {
@@ -55,39 +40,72 @@ new() {
   edit "$d"
 }
 
-show() {
-  cat "$1/README.md"
-}
-
-gitpush() {
-  git add "$1/README.md" && git commit -m "$2" && git push
-}
-
 search() {
   query="$(echo "$*" | sed -e "s/$1 //" -e 's/\ /+/g')"
   echo "$(git remote get-url --all origin | sed -e 's/git@github.com:/https:\/\/github.com\//' -e 's/\.git/\//')search?query=$query"
 }
 
-test -z "$1" && last && exit
+# Fix this to work with $EDITOR
+# I will make an alias later for "vim nospell"
+edit() {
+  test -z "$2" && vim "$1/README.md" && return
+  test "$2" = "s" && vim -c "set nospell" "$1/README.md" && return
+}
 
-test "$1" = "last" && gettitle "$(note)" && exit
-test "$1" = "edit" && edit "$(note)" "$2" && exit
-test "$1" = "remove" -o "$1" = "rm" && remove "$(note)" && exit
-test "$1" = "show" -o "$1" = "view" && show "$(note)" && exit
-test "$1" = "push" && gitpush "$(note)" "$(note last)" && exit
+list() {
+  awk '{ print "["FILENAME"] " $0""; nextfile}' ./*/README.md | sed -e 's/\.\///' -e 's/\/README.md//' -e 's/# //'
+}
 
-test "$1" = "search" -o "$1" = "q" && search "$@" && exit
+remove() {
+  echo "Do you want to remove $1? \c" && read -r answer
+  test "$answer" = "y" -o "$answer" = "yes" && rm -r "$1" && return
+  echo "Nothing happened" && return
+}
 
-test "$1" = "new" -o "$1" = "add" && new && exit
-test "$1" = "list" -o "$1" = "ls" && list && exit
-test "$1" = "help" -o "$1" = "h" && showhelp && exit
+last_isosec() {
+  l=$(find . -mindepth 1 -maxdepth 1 -type d | sort -n | tail -n 1 | sed 's/\.\///')
+  echo "$l"
+}
 
-if test -d "$1"; then
+title() {
+  title=$(head -n 1 "$1/README.md" | grep '^#' | sed 's/^\# //')
+  echo "$title"
+}
+
+show() {
+  cat "$1/README.md"
+}
+
+git_push() {
+  git add "$1/README.md" && git commit -m "$2" && git push
+}
+
+
+main() {
+  test -z "$1" && last_isosec && exit
+
+  test "$1" = "title" && title "$(note)" && exit
+  test "$1" = "edit" && edit "$(note)" "$2" && exit
+  test "$1" = "remove" -o "$1" = "rm" && remove "$(note)" && exit
+  test "$1" = "show" -o "$1" = "view" && show "$(note)" && exit
+  test "$1" = "push" && git_push "$(note)" "$(note title)" && exit
+
+  test "$1" = "new" -o "$1" = "add" && new && exit
+
+  test "$1" = "search" -o "$1" = "q" && search "$@" && exit
+  test "$1" = "list" -o "$1" = "ls" && list && exit
+  test "$1" = "help" -o "$1" = "h" && usage && exit
+
+  # Filter if note doesn't exist
+  test ! -d "$1" && usage && exit 1
+
   test "$2" = "edit" && edit "$1" "$3" && exit
   test "$2" = "remove" -o "$2" = "rm" && remove "$1" && exit
   test "$2" = "show" -o "$2" = "view" && show "$1" && exit
-  test "$2" = "title" && gettitle "$1" && exit
-  test "$2" = "push" && gitpush "$1" "$(note "$1" title)" && exit
-fi
+  test "$2" = "title" && title "$1" && exit
+  test "$2" = "push" && git_push "$1" "$(note "$1" title)" && exit
 
-showhelp && exit 1
+  usage && exit 1
+}
+
+main "$@"
