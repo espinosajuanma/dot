@@ -1,8 +1,12 @@
 #!/bin/sh
 # NAME
 #     note - print latest note isosec
+#
 # USAGE
-#     note <isosec> [subcommand]
+#     note (new|list|help)
+#     note <isosec> (title|edit|push|show|remove)
+#     note search [query]
+#
 # DESCRIPTION
 #     App to take notes for GitHub inspired by github.com/rwxrob/boost
 #
@@ -11,24 +15,22 @@
 #     note
 #
 #     Subcommands:
-#       title     print note's title
-#       edit      open note in editor
-#       push      push note to github
-#       show      print note in terminal
-#       remove    delete note
-#
-#     Special subcommands:
-#       new             add a note in directory and open editor
-#       list            print all notes titles and isosec in current directory
-#       search [query]  print query search url to github repository
-#       help            print this page
+#       new, add        add a note in directory and open editor
+#       list, ls        print all notes titles and isosec in current directory
+#       search, q       print query search url to github repository
+#       title           print note's title
+#       edit            open note in editor
+#       push            push note to github
+#       show, view      print note in terminal
+#       remove, rm      delete note
+#       help, h         print this page
 #
 # AUTHOR
 #     github.com/espinosajuanma
 
 usage() {
   name=$(basename "$0")
-  awk 'NR >= 2 && NR <= 27' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
+  awk 'NR >= 2 && NR <= 29' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
 }
 
 isosec() {
