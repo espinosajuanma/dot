@@ -1,20 +1,20 @@
 #!/bin/sh
-#       note      = show latest isosec note
-#       note last = show latest title note
-#       note edit = edit last note
-#       note push = push last note to git # requires `push` script
-#       note show = show last note in terminal
-#       note rm   = remove last note
-#       note ls   = show titles of notes in directory
+#       note        = show latest isosec note
+#       note last   = show latest title note
+#       note edit   = edit last note
+#       note push   = push last note to git # requires `push` script
+#       note show   = show last note in terminal
+#       note remove = remove last note
 #
-#       note new  = add a note in directory
-#
+#       note new    = add a note in directory
+#       note list   = show titles of notes in directory
 #       note search <query> = show search url for a note
 #
 #       note <isosec> edit
-#       note <isosec> rm
+#       note <isosec> remove
 #       note <isosec> show
 #       note <isosec> title
+#       note <isosec> push
 
 edit() {
   # Sometimes I want to write notes in other language
@@ -32,7 +32,7 @@ list() {
 showhelp() {
   name=$(basename "$0")
   echo "Usage $name"
-  awk 'NR >= 2 && NR <= 10' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
+  awk 'NR >= 2 && NR <= 17' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
 }
 
 remove() {
