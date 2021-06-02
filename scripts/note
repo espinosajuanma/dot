@@ -3,7 +3,7 @@
 #     note - print latest note isosec
 #
 # USAGE
-#     note (new|list|help)
+#     note (new|list|index|help)
 #     note <isosec> (title|edit|push|show|remove)
 #     note search [query]
 #
@@ -17,6 +17,7 @@
 #     Subcommands:
 #       new, add        add a note in directory and open editor
 #       list, ls        print all notes titles and isosec in current directory
+#       index           print an index markdown formatted
 #       search, q       print query search url to github repository
 #       title           print note's title
 #       edit            open note in editor
@@ -30,7 +31,7 @@
 
 usage() {
   name=$(basename "$0")
-  awk 'NR >= 2 && NR <= 29' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
+  awk 'NR >= 2 && NR <= 30' "$(readlink -f "$0")" | grep '^#' | sed -e 's/^\#//' -e "s/note/$name/"
 }
 
 isosec() {
@@ -39,7 +40,7 @@ isosec() {
 
 # TODO: implement valid_isosec | returns 1 when is a valid one
 valid_isosec() {
-  echo "$(expr "$1" : '^[0-9]\+' = "14")"
+  expr "$1" : '^[0-9]\+' = "14"
 }
 
 new() {
@@ -64,6 +65,10 @@ edit() {
 
 list() {
   awk '{ print "["FILENAME"] " $0""; nextfile}' ./*/README.md | sed -e 's/\.\///' -e 's/\/README.md//' -e 's/# //'
+}
+
+index() {
+  awk '{ print "1. ["$0"]("FILENAME")"; nextfile}' ./*/README.md | sed -e 's/# //'
 }
 
 remove() {
@@ -103,6 +108,8 @@ main() {
 
   test "$1" = "search" -o "$1" = "q" && search "$@" && exit
   test "$1" = "list" -o "$1" = "ls" && list && exit
+  test "$1" = "index" -o "$1" = "ls" && index && exit
+  test "$1" = "tail" && tail "$2" && exit
   test "$1" = "help" -o "$1" = "h" && usage && exit
 
   # Filter if note doesn't exist
