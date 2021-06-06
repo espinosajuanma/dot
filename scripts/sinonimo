@@ -1,2 +1,2 @@
 #!/bin/sh
-curl -s "http://sesat.fdi.ucm.es:8080/servicios/rest/sinonimos/json/$1" | jq -r '.sinonimos | map(.sinonimo) | join(", ")'
+curl -s "http://sesat.fdi.ucm.es:8080/servicios/rest/sinonimos/json/$1" | jq --arg word "$1" -r '.sinonimos | length as $amount | map(.sinonimo) | "Sinonimos de \($word) (\($amount)): " + join(", ")'
