@@ -1,4 +1,2 @@
 #!/bin/sh
-json="$(curl -s "http://sesat.fdi.ucm.es:8080/servicios/rest/sinonimos/json/$1")"
-
-echo "$json" | jq -Crj '.sinonimos | map(.sinonimo) | join(", ")' && echo
+curl -s "http://sesat.fdi.ucm.es:8080/servicios/rest/sinonimos/json/$1" | jq -r '.sinonimos | map(.sinonimo) | join(", ")'
