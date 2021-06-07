@@ -1,0 +1,2 @@
+#!/bin/sh
+curl -s "http://sesat.fdi.ucm.es:8080/servicios/rest/definicion/json/$1" | jq --arg word "$1" -r '.definiciones | length as $amount | map(.definicion) | "\u001b[32mDefiniciones de \($word) (\($amount)):\u001b[36m\n  - " + join("\n  - ")'
