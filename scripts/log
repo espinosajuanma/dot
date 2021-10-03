@@ -1,0 +1,27 @@
+#!/usr/bin/bash
+
+declare -A codes
+codes[primary]="\e[34m"   # blue
+codes[secondary]="\e[35m" # magenta
+codes[danger]="\e[31m"    # red
+codes[success]="\e[32m"   # green
+codes[warning]="\e[33m"   # yellow
+codes[info]="\e[36m"      # cyan
+codes[light]="\e[37m"     # white
+codes[normal]="\e[0m"     # reset
+
+get_time() {
+  date +'%d/%m/%Y %H:%M:%S'
+}
+
+show_message() {
+  test -z "${codes[$1]}" && exit 1
+  printf "%b[%s] - %s\e[0m\n" "${codes[$1]}" "$(get_time)" "$2"
+}
+
+main() {
+  test -z "$2" && exit 1
+  show_message "$1" "${*:2}"
+}
+
+main "$@"
