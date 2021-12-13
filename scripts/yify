@@ -1,12 +1,143 @@
 #!/bin/bash
-query="$*"
-json=$(curl -s "https://yts.mx/ajax/search?query=${query// /%20}")
-for row in $(echo "${json}" | jq -r '.data[] | @base64'); do
-  _jq(){
-    echo "${row}" | base64 --decode | jq -r "${1}"
-  }
-  t=$(_jq '.title')
-  y=$(_jq '.year')
-  u=$(_jq '.url')
-  printf '🎬 %s (%s)\n %s\n' "$t" "$y" "$u"
-done
+API="https://yts.mx/api/v2"
+
+# TO DO: Handle errors
+# API return it has .status ('ok' or 'error') and .status_message
+# Only if .status is 'ok' it is going to have .data
+
+# TO DO: Setup environment variables
+# User, password and app key
+
+# TO DO: get app key
+get_user_key() {
+  curl -s -X POST "$API/user_get_key.json" \
+    -d '{"username":"'"$YFUSER"'","password":"'"$YFPASS"'","application_key":"'"$YFKEY"'"}'
+}
+
+# TO DO: get user key
+get_bookmarks() { 
+  curl -s -G "$API/get_movie_bookmars.json" \
+    --data-urlencode "user_key=$YFUSERKEY" \
+    | parse_list
+}
+
+# TO DO: get user key and app key
+add_bookmark() {
+  curl -s -X POST "$API/add_movie_bookmark.json" \
+    -d '{"user_key":"'"$YFUSERKEY"'","movie_id":"'"$1"'","application_key":"'"$YFKEY"'"}'
+}
+
+# TO DO: get user key and app key
+delete_bookmark() {
+  curl -s -X POST "$API/delete_movie_bookmark.json" \
+    -d '{"user_key":"'"$YFUSERKEY"'","movie_id":"'"$1"'","application_key":"'"$YFKEY"'"}'
+}
+
+# 404
+list_upcoming() {
+  curl -s -G "$API/list_upcoming.json" 
+}
+
+movie_suggestions() {
+  curl -s -G "$API/movie_suggestions.json" \
+    --data-urlencode "movie_id=$1" \
+    | parse_list
+}
+
+list_movies() {
+  page=1
+  test ! -z "$1" && page="$1"
+  curl -s -G "$API/list_movies.json" \
+    --data-urlencode "page=$page" \
+    | parse_list
+}
+
+list_genre() {
+  page=1
+  test ! -z "$2" && page="$2"
+  curl -s -G "$API/list_movies.json" \
+    --data-urlencode "page=$page" \
+    --data-urlencode "genre=$1" \
+    | parse_list
+}
+
+search() {
+  query="$*"
+  curl -s -G "$API/list_movies.json" \
+    --data-urlencode "query_term=$query"\
+    | parse_list
+}
+
+get_movie() {
+  curl -G -s "$API/movie_details.json" \
+    --data-urlencode "movie_id=$1" \
+    | show_movie
+}
+
+parse_list() {
+  jq -r '"\u001b[31m"+"Page: "+(if .data.page_number > 0 then .data.page_number|tostring else "1" end)+" - "+"Movies: "+(.data.movie_count|tostring),
+  (.data.movies[] | "\u001b[35m["+.language+"] 🎬 \u001b[36m("+(.year|tostring)+") \u001b[32m"+.title+" \u001b[0m["+(.id|tostring)+"]")'
+}
+
+show_movie() {
+  jq -r \
+  '"\u001b[32m\u001b[1m"+.data.movie.title + "\u001b[0m\u001b[31m ("+(.data.movie.year|tostring)+") 🌟\u001b[33m"+(.data.movie.rating|tostring),
+  "\u001b[0m\u001b[36m  • \u001b[0myify: \u001b[4m\u001b[36m"+.data.movie.url,
+  "\u001b[0m\u001b[36m  • \u001b[0mIMDb: \u001b[4m\u001b[36mhttps://www.imdb.com/title/"+.data.movie.imdb_code,
+  "\u001b[0m\u001b[36m  • \u001b[0mTrailer: \u001b[4m\u001b[36mhttps://www.youtube.com/watch?v="+.data.movie.yt_trailer_code,
+  "",
+  "\u001b[0m\u001b[35mGenres: "+(.data.movie.genres|join(", ")),
+  "",
+  "\u001b[0m"+.data.movie.description_full'
+}
+
+genres() {
+  printf "\e[31mMovie Genres\e[0m\n"
+  echo "action, adventure, animation, biography, comedy, crime, documentary, drama, family, fantasy, film-noir, game-show, history, horror, music, musical, mystery, news, reality-tv, romance, sci-fi, sport, talk-show, thriller, war, western"
+}
+
+show_help() {
+  printf "\e[31mYify command help\e[0m\n"
+  echo "    yify (movie_id)"
+  echo "    yify suggest (movie_id)"
+  echo "    yify search (query)"
+  echo "    yify genres"
+  echo "    yify movies <page_number>"
+  echo "    yify (genre) <page_number>"
+}
+
+command="$1"
+case "$command" in
+  "help") show_help && exit;;
+  "movies") list_movies "$2" && exit;;
+  "search") search "${@:2}" && exit;;
+  "action") list_genre "action" "${@:2}" && exit;;
+  "adventure") list_genre "adventure" "${@:2}" && exit;;
+  "animation") list_genre "animation" "${@:2}" && exit;;
+  "biography") list_genre "biography" "${@:2}" && exit;;
+  "comedy") list_genre "comedy" "${@:2}" && exit;;
+  "crime") list_genre "crime" "${@:2}" && exit;;
+  "documentary") list_genre "documentary" "${@:2}" && exit;;
+  "drama") list_genre "drama" "${@:2}" && exit;;
+  "family") list_genre "family" "${@:2}" && exit;;
+  "fantasy") list_genre "fantasy" "${@:2}" && exit;;
+  "film-noir") list_genre "film-noir" "${@:2}" && exit;;
+  "game-show") list_genre "game-show" "${@:2}" && exit;;
+  "history") list_genre "history" "${@:2}" && exit;;
+  "horror") list_genre "horror" "${@:2}" && exit;;
+  "music") list_genre "music" "${@:2}" && exit;;
+  "musical") list_genre "musical" "${@:2}" && exit;;
+  "mystery") list_genre "mystery" "${@:2}" && exit;;
+  "news") list_genre "news" "${@:2}" && exit;;
+  "reality-tv") list_genre "reality-tv" "${@:2}" && exit;;
+  "romance") list_genre "romance" "${@:2}" && exit;;
+  "sci-fi") list_genre "sci-fi" "${@:2}" && exit;;
+  "sport") list_genre "sport" "${@:2}" && exit;;
+  "talk-show") list_genre "talk-show" "${@:2}" && exit;;
+  "thriller") list_genre "thriller" "${@:2}" && exit;;
+  "war") list_genre "war" "${@:2}" && exit;;
+  "western") list_genre "western" "${@:2}" && exit;;
+  "genres") genres && exit;;
+  "suggest") movie_suggestions "$2" && exit;;
+  *) get_movie "$@" && exit;;
+esac
