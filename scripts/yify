@@ -104,6 +104,12 @@ show_help() {
   echo "    yify genres"
   echo "    yify movies <page_number>"
   echo "    yify (genre) <page_number>"
+  echo "    yify rand"
+}
+
+rand_movie() {
+  count="$(curl -s -G "$API/list_movies.json" | jq '.data.movie_count')"
+  yify "$((1 + $RANDOM % $count))"
 }
 
 command="$1"
@@ -139,5 +145,6 @@ case "$command" in
   "western") list_genre "western" "${@:2}" && exit;;
   "genres") genres && exit;;
   "suggest") movie_suggestions "$2" && exit;;
+  "rand") rand_movie && exit;;
   *) get_movie "$@" && exit;;
 esac
