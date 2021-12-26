@@ -1,42 +1,41 @@
 #!/bin/bash
+set -e
 API="https://yts.mx/api/v2"
+GENRES=("fantasy" "family" "drama" "documentary" "crime" "comedy" "biography" "animation" "adventure" "action" "reality-tv" "romance" "history" "horror" "film-noir" "game-show" "mystery" "news" "music" "musical" "western" "war" "thriller" "talk-show" "sport" "sci-fi")
+
+declare -A HELP
+HELP[main]='Yify is a quick tool to get info about movies. Have fun!
+
+Usage:
+
+        yify <command> [arguments]
+
+Commands:
+
+        movies    show list of all movies
+        <genre>   show list of all movies of that genre
+        genres    show list of all available genres
+        search    show list of movies by a search query
+        suggest   show list of suggested movies by movie id
+        <id>      show movie details of a movie by movie id
+        rand      show movie details of a random movie
+        help      show this message
+
+Use "yify help <command>" for more information about a command.
+
+Author:
+
+github.com/espinosajuanma'
 
 # TO DO: Handle errors
 # API return it has .status ('ok' or 'error') and .status_message
 # Only if .status is 'ok' it is going to have .data
 
-# TO DO: Setup environment variables
-# User, password and app key
+# ---- CMD: suggest
 
-# TO DO: get app key
-get_user_key() {
-  curl -s -X POST "$API/user_get_key.json" \
-    -d '{"username":"'"$YFUSER"'","password":"'"$YFPASS"'","application_key":"'"$YFKEY"'"}'
-}
+HELP[suggest]='usage: yify suggest <id>
 
-# TO DO: get user key
-get_bookmarks() { 
-  curl -s -G "$API/get_movie_bookmars.json" \
-    --data-urlencode "user_key=$YFUSERKEY" \
-    | parse_list
-}
-
-# TO DO: get user key and app key
-add_bookmark() {
-  curl -s -X POST "$API/add_movie_bookmark.json" \
-    -d '{"user_key":"'"$YFUSERKEY"'","movie_id":"'"$1"'","application_key":"'"$YFKEY"'"}'
-}
-
-# TO DO: get user key and app key
-delete_bookmark() {
-  curl -s -X POST "$API/delete_movie_bookmark.json" \
-    -d '{"user_key":"'"$YFUSERKEY"'","movie_id":"'"$1"'","application_key":"'"$YFKEY"'"}'
-}
-
-# 404
-list_upcoming() {
-  curl -s -G "$API/list_upcoming.json" 
-}
+Show a list of movies suggestion from a specific movie id.'
 
 movie_suggestions() {
   curl -s -G "$API/movie_suggestions.json" \
@@ -44,22 +43,27 @@ movie_suggestions() {
     | parse_list
 }
 
+# ---- CMD: movies
+
+HELP[movies]='usage: yify <movies|(genre)> [page_number]
+
+Show a list of movies order from latest to oldest.'
+
 list_movies() {
   page=1
-  test ! -z "$1" && page="$1"
-  curl -s -G "$API/list_movies.json" \
-    --data-urlencode "page=$page" \
-    | parse_list
-}
-
-list_genre() {
-  page=1
+  genre="$1"
   test ! -z "$2" && page="$2"
   curl -s -G "$API/list_movies.json" \
     --data-urlencode "page=$page" \
-    --data-urlencode "genre=$1" \
+    --data-urlencode "genre=$genre" \
     | parse_list
 }
+
+# ---- CMD: search
+
+HELP[search]='usage: yify search <query>
+
+Show a list of movies that match the query.'
 
 search() {
   query="$*"
@@ -68,10 +72,63 @@ search() {
     | parse_list
 }
 
+# ---- CMD: movie
+
+HELP[movie]='usage: yify movie <id>
+
+Show details of a specific movie id.'
+
 get_movie() {
   curl -G -s "$API/movie_details.json" \
     --data-urlencode "movie_id=$1" \
     | show_movie
+}
+
+# ---- CMD: genres
+
+HELP[genres]='usage: yify genres
+
+Show a list of all available genres.'
+
+show_genres() {
+  printf "\e[31mMovie Genres 🍿\e[0m\n"
+  for i in ${GENRES[*]}; do echo "- $i"; done
+}
+
+# ---- CMD: rand
+
+HELP[rand]='usage: yify rand
+
+Select a random movie and show details.'
+
+rand_movie() {
+  count="$(curl -s -G "$API/list_movies.json" | jq '.data.movie_count')"
+  yify "$((1 + RANDOM % count))"
+}
+
+# ---- CMD: help
+
+HELP[help]='usage: yify help [command]
+
+Show a list of commands or usage of a specific one.'
+
+show_help() {
+  test -z "$1" && echo "${HELP[main]}" && exit
+  [[ "${HELP[$1]:+exists}" ]] && echo "${HELP[$1]}" && exit
+  if [[ "${GENRES[*]}" =~ $1 ]]; then
+    echo "${HELP[movies]}" && exit
+  fi
+
+  echo "$1 command doesn't exist"
+}
+
+# ---- UTILS
+
+parse_genre() {
+  if [[ "${GENRES[*]}" =~ $1 ]]; then
+    list_movies "$@" && exit
+  fi
+  get_movie "$@" && exit
 }
 
 parse_list() {
@@ -91,60 +148,16 @@ show_movie() {
   "\u001b[0m"+.data.movie.description_full'
 }
 
-genres() {
-  printf "\e[31mMovie Genres\e[0m\n"
-  echo "action, adventure, animation, biography, comedy, crime, documentary, drama, family, fantasy, film-noir, game-show, history, horror, music, musical, mystery, news, reality-tv, romance, sci-fi, sport, talk-show, thriller, war, western"
-}
-
-show_help() {
-  printf "\e[31mYify command help\e[0m\n"
-  echo "    yify (movie_id)"
-  echo "    yify suggest (movie_id)"
-  echo "    yify search (query)"
-  echo "    yify genres"
-  echo "    yify movies <page_number>"
-  echo "    yify (genre) <page_number>"
-  echo "    yify rand"
-}
-
-rand_movie() {
-  count="$(curl -s -G "$API/list_movies.json" | jq '.data.movie_count')"
-  yify "$((1 + $RANDOM % $count))"
-}
+# ---- MAIN
 
 command="$1"
 case "$command" in
-  "help") show_help && exit;;
-  "movies") list_movies "$2" && exit;;
+  "help") show_help "$2" && exit;;
+  "movies") list_movies "" "$2" && exit;;
+  "movie") get_movie "$2" && exit;;
   "search") search "${@:2}" && exit;;
-  "action") list_genre "action" "${@:2}" && exit;;
-  "adventure") list_genre "adventure" "${@:2}" && exit;;
-  "animation") list_genre "animation" "${@:2}" && exit;;
-  "biography") list_genre "biography" "${@:2}" && exit;;
-  "comedy") list_genre "comedy" "${@:2}" && exit;;
-  "crime") list_genre "crime" "${@:2}" && exit;;
-  "documentary") list_genre "documentary" "${@:2}" && exit;;
-  "drama") list_genre "drama" "${@:2}" && exit;;
-  "family") list_genre "family" "${@:2}" && exit;;
-  "fantasy") list_genre "fantasy" "${@:2}" && exit;;
-  "film-noir") list_genre "film-noir" "${@:2}" && exit;;
-  "game-show") list_genre "game-show" "${@:2}" && exit;;
-  "history") list_genre "history" "${@:2}" && exit;;
-  "horror") list_genre "horror" "${@:2}" && exit;;
-  "music") list_genre "music" "${@:2}" && exit;;
-  "musical") list_genre "musical" "${@:2}" && exit;;
-  "mystery") list_genre "mystery" "${@:2}" && exit;;
-  "news") list_genre "news" "${@:2}" && exit;;
-  "reality-tv") list_genre "reality-tv" "${@:2}" && exit;;
-  "romance") list_genre "romance" "${@:2}" && exit;;
-  "sci-fi") list_genre "sci-fi" "${@:2}" && exit;;
-  "sport") list_genre "sport" "${@:2}" && exit;;
-  "talk-show") list_genre "talk-show" "${@:2}" && exit;;
-  "thriller") list_genre "thriller" "${@:2}" && exit;;
-  "war") list_genre "war" "${@:2}" && exit;;
-  "western") list_genre "western" "${@:2}" && exit;;
-  "genres") genres && exit;;
+  "genres") show_genres && exit;;
   "suggest") movie_suggestions "$2" && exit;;
   "rand") rand_movie && exit;;
-  *) get_movie "$@" && exit;;
+  *) parse_genre "${@:1}";;
 esac
