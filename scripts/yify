@@ -13,6 +13,7 @@ Usage:
 Commands:
 
         movies    show list of all movies
+        download  show list of all movies
         <genre>   show list of all movies of that genre
         genres    show list of all available genres
         search    show list of movies by a search query
@@ -84,6 +85,19 @@ get_movie() {
     | show_movie
 }
 
+# ---- CMD: movie
+
+HELP[download]='usage: yify download <id>
+
+Start downloading torrent file.'
+
+download_movie() {
+  link="$(curl -G -s "$API/movie_details.json" \
+    --data-urlencode "movie_id=$1" \
+    | get_torrent)"
+  transmission-cli "$link"
+}
+
 # ---- CMD: genres
 
 HELP[genres]='usage: yify genres
@@ -138,7 +152,7 @@ parse_list() {
 
 show_movie() {
   jq -r \
-  '"\u001b[32m\u001b[1m"+.data.movie.title + "\u001b[0m\u001b[31m ("+(.data.movie.year|tostring)+") 🌟\u001b[33m"+(.data.movie.rating|tostring),
+    '"\u001b[32m\u001b[1m"+.data.movie.title + "\u001b[0m\u001b[31m ("+(.data.movie.year|tostring)+") 🌟\u001b[33m"+(.data.movie.rating|tostring)+" \u001b[32m["+(.data.movie.id|tostring)+"]",
   "\u001b[0m\u001b[36m  • \u001b[0myify: \u001b[4m\u001b[36m"+.data.movie.url,
   "\u001b[0m\u001b[36m  • \u001b[0mIMDb: \u001b[4m\u001b[36mhttps://www.imdb.com/title/"+.data.movie.imdb_code,
   "\u001b[0m\u001b[36m  • \u001b[0mTrailer: \u001b[4m\u001b[36mhttps://www.youtube.com/watch?v="+.data.movie.yt_trailer_code,
@@ -148,6 +162,10 @@ show_movie() {
   "\u001b[0m"+.data.movie.description_full'
 }
 
+get_torrent() {
+  jq -r '.data.movie.torrents[-1].url'
+}
+
 # ---- MAIN
 
 command="$1"
@@ -155,6 +173,7 @@ case "$command" in
   "help") show_help "$2" && exit;;
   "movies") list_movies "" "$2" && exit;;
   "movie") get_movie "$2" && exit;;
+  "download") download_movie "$2" && exit;;
   "search") search "${@:2}" && exit;;
   "genres") show_genres && exit;;
   "suggest") movie_suggestions "$2" && exit;;
