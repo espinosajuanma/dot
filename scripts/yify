@@ -39,6 +39,7 @@ HELP[suggest]='usage: yify suggest <id>
 Show a list of movies suggestion from a specific movie id.'
 
 movie_suggestions() {
+  test -z "$1" && show_help 'suggest' && exit 1
   curl -s -G "$API/movie_suggestions.json" \
     --data-urlencode "movie_id=$1" \
     | parse_list
@@ -67,6 +68,7 @@ HELP[search]='usage: yify search <query>
 Show a list of movies that match the query.'
 
 search() {
+  test -z "$1" && show_help 'search' && exit 1
   query="$*"
   curl -s -G "$API/list_movies.json" \
     --data-urlencode "query_term=$query"\
@@ -80,18 +82,25 @@ HELP[movie]='usage: yify movie <id>
 Show details of a specific movie id.'
 
 get_movie() {
+  test -z "$1" && show_help 'movie' && exit 1
   curl -G -s "$API/movie_details.json" \
     --data-urlencode "movie_id=$1" \
     | show_movie
 }
 
-# ---- CMD: movie
+# ---- CMD: download
 
-HELP[download]='usage: yify download <id>
+HELP[download]='usage: yify download <id|stop>
 
-Start downloading torrent file.'
+If id is provided start downloading the movie. If "stop" will finishes all downloads.'
 
 download_movie() {
+  check_dependency 'transmission-cli'
+  test -z "$1" && show_help 'download' && exit 1
+  if [[ "$1" == "stop" ]]; then
+    killall transmission-cli
+    exit
+  fi
   link="$(curl -G -s "$API/movie_details.json" \
     --data-urlencode "movie_id=$1" \
     | get_torrent)"
@@ -138,6 +147,13 @@ show_help() {
 
 # ---- UTILS
 
+check_dependency() {
+  if ! command -v "$1" > '/dev/null'; then
+    echo "You need $1 to run this command" && exit 1
+  fi
+}
+
+
 parse_genre() {
   if [[ "${GENRES[*]}" =~ $1 ]]; then
     list_movies "$@" && exit
@@ -167,6 +183,8 @@ get_torrent() {
 }
 
 # ---- MAIN
+
+check_dependency 'jq'
 
 command="$1"
 case "$command" in
