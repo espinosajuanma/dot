@@ -13,7 +13,8 @@ Usage:
 Commands:
 
         movies    show list of all movies
-        download  show list of all movies
+        download  start dowloading a movie
+        watch     start mpv player with magnet link
         <genre>   show list of all movies of that genre
         genres    show list of all available genres
         search    show list of movies by a search query
@@ -106,6 +107,22 @@ download_movie() {
   transmission-cli "$link" -f 'yify download stop'
 }
 
+# ---- CMD: watch
+
+HELP[watch]='usage: yify watch <id>
+
+Open mpv player with direct magnet link download'
+
+watch_movie() {
+  check_dependency 'peerflix'
+  check_dependency 'mpv'
+  test -z "$1" && show_help 'watch' && exit 1
+  magnet="$(curl -G -s "$API/movie_details.json" \
+    --data-urlencode "movie_id=$1" \
+    | get_magnet)"
+  peerflix "$magnet" --mpv
+}
+
 # ---- CMD: genres
 
 HELP[genres]='usage: yify genres
@@ -181,6 +198,11 @@ get_torrent() {
   jq -r '.data.movie.torrents[-1].url'
 }
 
+# TO DO: Manage trackers
+get_magnet() {
+  jq -r '"magnet:?xt=urn:btih:" + .data.movie.torrents[-1].hash + "&dn=" + (.data.movie.title | @uri) + "&tr=udp://open.demonii.com:1337/announce"'
+}
+
 # ---- MAIN
 
 check_dependency 'jq'
@@ -191,6 +213,7 @@ case "$command" in
   "movies") list_movies "" "$2" && exit;;
   "movie") get_movie "$2" && exit;;
   "download") download_movie "$2" && exit;;
+  "watch") watch_movie "$2" && exit;;
   "search") search "${@:2}" && exit;;
   "genres") show_genres && exit;;
   "suggest") movie_suggestions "$2" && exit;;
