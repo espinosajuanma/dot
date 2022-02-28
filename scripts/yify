@@ -120,7 +120,7 @@ watch_movie() {
   magnet="$(curl -G -s "$API/movie_details.json" \
     --data-urlencode "movie_id=$1" \
     | get_magnet)"
-  peerflix "$magnet" --mpv
+  peerflix "$magnet" --mpv -r
 }
 
 # ---- CMD: genres
