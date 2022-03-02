@@ -1,0 +1,4 @@
+#!/bin/bash
+test -z "$1" && echo "Give me a folder to compress" && exit 1
+test -z "$2" && echo "Give me a file name" && exit 1
+tar -zcf "$2.tar.gz" "$1"
