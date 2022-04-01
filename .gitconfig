@@ -1,0 +1,13 @@
+[user]
+	name = Juanma Espinosa
+	email = espinosajuanmanuel@gmail.com
+	signingkey = espinosajuanmanuel@gmail.com
+
+[init]
+	defaultBranch = main
+
+[commit]
+	gpgsign = true
+
+[tag]
+	gpgSign = true
