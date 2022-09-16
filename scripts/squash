@@ -1,0 +1,9 @@
+#!/bin/bash
+
+flat() {
+  git reset $(git merge-base master $(git branch --show-current))
+  echo "Remember to add your changes, commit and 'git push --force'"
+}
+
+printf "Are you sure you want to squash your git branch history? (y/N) " && read -r answer
+test "$answer" = "y" -o "$answer" = "yes" && flat
