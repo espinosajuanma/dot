@@ -1,0 +1,36 @@
+#!/bin/bash
+
+declare -A clock
+
+clock[1]='🕐'
+clock[2]='🕑'
+clock[3]='🕒'
+clock[4]='🕓'
+clock[5]='🕔'
+clock[6]='🕕'
+clock[7]='🕖'
+clock[8]='🕗'
+clock[9]='🕘'
+clock[10]='🕙'
+clock[11]='🕚'
+clock[12]='🕛'
+
+hour="$(date '+%l')"
+minute="$(date '+%M')"
+
+if [[ "$minute" -ge "30" ]]; then
+  clock[1]='🕜'
+  clock[2]='🕝'
+  clock[3]='🕞'
+  clock[4]='🕟'
+  clock[5]='🕠'
+  clock[6]='🕡'
+  clock[7]='🕢'
+  clock[8]='🕣'
+  clock[9]='🕤'
+  clock[10]='🕥'
+  clock[11]='🕦'
+  clock[12]='🕧'
+fi
+
+echo "${clock[$hour]} $(date '+%H:%M')"
