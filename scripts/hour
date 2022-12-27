@@ -9,14 +9,18 @@ clock[4]='🕓'
 clock[5]='🕔'
 clock[6]='🕕'
 clock[7]='🕖'
-clock[8]='🕗'
+clock['8']='🕗'
 clock[9]='🕘'
 clock[10]='🕙'
 clock[11]='🕚'
 clock[12]='🕛'
 
-hour="$(date '+%l')"
+hour="$(date '+%-I')"
 minute="$(date '+%M')"
+
+if [[ "$hour" == "8" ]]; then
+  echo "yes"
+fi
 
 if [[ "$minute" -ge "30" ]]; then
   clock[1]='🕜'
