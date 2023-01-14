@@ -24,9 +24,6 @@ declare white="\e[37m"
 declare reset="\e[0m"
 
 _initialize() {
-  test -z "$HQUSER" && echo "HQUSER not set." && exit 1
-  test -z "$HQPASS" && echo "HQPASS not set." && exit 1
-
   UPDATED="$(x.config updated)"
   URL="https://api.bluelytics.com.ar/v2"
 }
