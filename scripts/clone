@@ -1,0 +1,4 @@
+#!/bin/bash
+test -z "$1" && echo "USAGE: clone github-user/github-repo" && exit 1
+git clone "git@github.com:$1.git"
+
