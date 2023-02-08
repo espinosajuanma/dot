@@ -1,4 +1,3 @@
 #!/bin/bash
-test -z "$1" && echo "💻  http://meet.google.com/new" && exit
-echo "💻  http://g.co/meet/$1"
+xdg-open "http://meet.google.com/new" &> /dev/null &
 
