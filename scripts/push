@@ -1,3 +1,2 @@
-#!/bin/sh
-test -z "$1" && echo "Give me a reason to commit and push" && exit 1
-git add . && git commit -m "$*" && git push
+#!/bin/bash
+git push -u origin "$(git branch --show-current)"
