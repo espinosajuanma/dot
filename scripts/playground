@@ -1,5 +1,5 @@
 #!/bin/bash
-uuid="$(uniq uuid)"
+uuid="$(uuidgen)"
 
 tmux new-window -n playground
 tmux split-window -h
