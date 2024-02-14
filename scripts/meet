@@ -1,3 +1,6 @@
 #!/bin/bash
-xdg-open "http://meet.google.com/new" &> /dev/null &
-
+id="new"
+if [[ ! -z "$1" ]]; then
+  id="$1"
+fi
+xdg-open "http://meet.google.com/$id" &> /dev/null &
