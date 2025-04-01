@@ -1,0 +1,22 @@
+[/]
+audible-bell=false
+background-color='rgb(26,26,26)'
+background-transparency-percent=43
+bold-color-same-as-fg=true
+bold-is-bright=true
+cursor-background-color='rgb(26,26,26)'
+cursor-blink-mode='on'
+cursor-colors-set=false
+cursor-foreground-color='rgb(229,229,229)'
+font='Ubuntu Mono 12'
+foreground-color='rgb(229,229,229)'
+highlight-background-color='rgb(26,26,26)'
+highlight-colors-set=false
+highlight-foreground-color='rgb(229,229,229)'
+palette=['rgb(26,26,26)', 'rgb(192,28,40)', 'rgb(4,231,98)', 'rgb(245,213,71)', 'rgb(0,163,228)', 'rgb(219,48,105)', 'rgb(42,161,179)', 'rgb(201,200,194)', 'rgb(94,92,100)', 'rgb(219,48,105)', 'rgb(4,231,98)', 'rgb(245,213,71)', 'rgb(0,115,162)', 'rgb(219,48,105)', 'rgb(0,161,228)', 'rgb(229,229,229)']
+scrollbar-policy='never'
+use-system-font=false
+use-theme-colors=false
+use-theme-transparency=true
+use-transparent-background=false
+visible-name='espinosajuanma'

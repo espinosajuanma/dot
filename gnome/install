@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Check if dconf file exists
+if [ ! -f "espinosajuanma-terminal-profile.dconf" ]; then
+  echo "Error: espinosajuanma-terminal-profile.dconf not found. Make sure it's in the same directory as this script."
+  exit 1
+fi
+
+UUID=$(uuidgen)
+
+if [ -z "$UUID" ]; then
+    echo "Error: Could not extract UUID from espinosajuanma-terminal-profile.dconf. Check the file format."
+    exit 1
+fi
+
+dconf load "/org/gnome/terminal/legacy/profiles:/:$UUID/" < espinosajuanma-terminal-profile.dconf
+
+if [ $? -eq 0 ]; then
+  echo "GNOME Terminal profile imported successfully!"
+else
+  echo "Error: Failed to import GNOME Terminal profile."
+  exit 1
+fi
+
+exit 0
